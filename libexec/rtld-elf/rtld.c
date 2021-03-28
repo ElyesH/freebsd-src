@@ -2189,7 +2189,7 @@ cleanup1:
 			continue;
 		/*
 		 * Not matched against any standard path, add the path
-		 * to result. Separate consequtive paths with ':'.
+		 * to result. Separate consecutive paths with ':'.
 		 */
 		if (fcount > 0) {
 			filtered_path[fndx] = ':';
