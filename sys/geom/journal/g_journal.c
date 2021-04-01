@@ -1726,7 +1726,7 @@ g_journal_mark_as_dirty(struct g_journal_softc *sc)
 
 /*
  * Function read record header from the given journal.
- * It is very simlar to g_read_data(9), but it doesn't allocate memory for bio
+ * It is very similar to g_read_data(9), but it doesn't allocate memory for bio
  * and data on every call.
  */
 static int
