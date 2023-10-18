@@ -462,7 +462,7 @@ load_xcr(u_int reg, u_long val)
 }
 
 /*
- * Global TLB flush (except for thise for pages marked PG_G)
+ * Global TLB flush (except for this for pages marked PG_G)
  */
 static __inline void
 invltlb(void)
