@@ -288,18 +288,18 @@ acpi_pcib_producer_handler(ACPI_RESOURCE *res, void *context)
 #endif
 
 #if defined(NEW_PCIB) && defined(PCI_RES_BUS)
-static int
-decoded_bus_range(struct acpi_hpcib_softc *sc, rman_res_t *startp,
+static bool
+get_decoded_bus_range(struct acpi_hpcib_softc *sc, rman_res_t *startp,
     rman_res_t *endp)
 {
 	struct resource_list_entry *rle;
 
 	rle = resource_list_find(&sc->ap_host_res.hr_rl, PCI_RES_BUS, 0);
 	if (rle == NULL)
-		return (ENXIO);
+		return (false);
 	*startp = rle->start;
 	*endp = rle->end;
-	return (0);
+	return (true);
 }
 #endif
 
@@ -497,7 +497,7 @@ acpi_pcib_acpi_attach(device_t dev)
 	     * If we have a region of bus numbers, use the first
 	     * number for our bus.
 	     */
-	    if (decoded_bus_range(sc, &start, &end) == 0)
+	    if (get_decoded_bus_range(sc, &start, &end))
 		    sc->ap_bus = start;
 	    else {
 		    rid = 0;
@@ -517,7 +517,7 @@ acpi_pcib_acpi_attach(device_t dev)
 	     * If there is a decoded bus range, assume the bus number is
 	     * the first value in the range.  Warn if _BBN doesn't match.
 	     */
-	    if (decoded_bus_range(sc, &start, &end) == 0) {
+	    if (get_decoded_bus_range(sc, &start, &end)) {
 		    if (sc->ap_bus != start) {
 			    device_printf(dev,
 				"WARNING: BIOS configured bus number (%d) is "
@@ -629,14 +629,18 @@ static uint32_t
 acpi_pcib_read_config(device_t dev, u_int bus, u_int slot, u_int func,
     u_int reg, int bytes)
 {
-    return (pci_cfgregread(bus, slot, func, reg, bytes));
+    struct acpi_hpcib_softc *sc = device_get_softc(dev);
+
+    return (pci_cfgregread(sc->ap_segment, bus, slot, func, reg, bytes));
 }
 
 static void
 acpi_pcib_write_config(device_t dev, u_int bus, u_int slot, u_int func,
     u_int reg, uint32_t data, int bytes)
 {
-    pci_cfgregwrite(bus, slot, func, reg, data, bytes);
+    struct acpi_hpcib_softc *sc = device_get_softc(dev);
+
+    pci_cfgregwrite(sc->ap_segment, bus, slot, func, reg, data, bytes);
 }
 
 static int
